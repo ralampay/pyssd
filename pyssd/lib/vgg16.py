@@ -64,7 +64,7 @@ class VGGBase(nn.Module):
         out = self.pool3(out)   # (N, 256, 38, 38)
 
         out = self.conv4_1(out) # (N, 512, 38, 38)
-        out = self.rlue(out)
+        out = self.relu(out)
         out = self.conv4_2(out) # (N, 512, 38, 38)
         out = self.relu(out)
         out = self.conv4_3(out) # (N, 512, 38, 38)
