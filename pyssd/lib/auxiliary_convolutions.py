@@ -61,7 +61,7 @@ class AuxiliaryConvolutions(nn.Module):
 
         out = self.conv11_1(out)                    # (N, 128, 3, 3)
         out = self.relu(out)
-        conv11_2_feats = self.conv_11_2(out)        # (N, 256, 1, 1)
+        conv11_2_feats = self.conv11_2(out)        # (N, 256, 1, 1)
         conv11_2_feats = self.relu(conv11_2_feats)
 
         # Higher-level feature maps
