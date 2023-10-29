@@ -39,7 +39,9 @@ assert(expected_shape_b == list(conv9_2_feats.shape))
 assert(expected_shape_c == list(conv10_2_feats.shape))
 assert(expected_shape_d == list(conv11_2_feats.shape))
 
-pred_convs = PredictionConvolutions(2)
+num_classes = 2
+
+pred_convs = PredictionConvolutions(num_classes)
 locs, classes_scores = pred_convs(
     conv4_3_feats, 
     conv7_feats,
@@ -49,5 +51,11 @@ locs, classes_scores = pred_convs(
     conv11_2_feats
 )
 
+expected_shape_locs = [1, 8732, 4]
+expected_shape_classes_scores = [1, 8732, num_classes]
+
 print(f"PredictionConvolutions forward() locs: {locs.shape}")
 print(f"PredictionConvolutions forward() classes_scores: {classes_scores.shape}")
+
+assert(expected_shape_locs == list(locs.shape))
+assert(expected_shape_classes_scores == list(classes_scores.shape))
