@@ -36,11 +36,15 @@ print(f"Predictions Shape: {predictions.shape}")
 
 original_image_width = 300
 original_image_height = 300
-color = (0, 0, 255)
+border_color = (0, 0, 255)
+text_color = (0, 0, 0)
 
-for box in locs[0]:
+for box, class_probs in zip(locs[0], predictions[0]):
     # Extract center coordinates (x_center, y_center, width, height)
     x_center, y_center, width, height = box
+
+    class_id = class_probs.argmax().item()
+    class_probability = class_probs[class_id].item()
 
     # Calculate the (x1, y1) and (x2, y2) coordinates of the bounding box
     x1 = int((x_center - width / 2) * original_image_width)
@@ -49,7 +53,13 @@ for box in locs[0]:
     y2 = int((y_center + height / 2) * original_image_height)
 
     # Draw the bounding box on the output image
-    cv2.rectangle(original_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+    cv2.rectangle(original_image, (x1, y1), (x2, y2), border_color, 1)
+
+    # Display class name and probability
+    class_name = f'Class {class_id}'
+    text = f'{class_name}: {class_probability:.2f}'
+    cv2.putText(original_image, text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, text_color, 2)
+
 
 # Display or save the image
 cv2.imshow('SSD Output', original_image)
