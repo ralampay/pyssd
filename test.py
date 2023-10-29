@@ -6,6 +6,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 from pyssd.lib.vgg16 import VGGBase
 from pyssd.lib.auxiliary_convolutions import AuxiliaryConvolutions
 from pyssd.lib.prediction_convolutions import PredictionConvolutions
+from pyssd.lib.ssd300 import SSD300
 
 # Test VGGBase
 tensors = torch.rand(1, 3, 300, 300)
@@ -59,3 +60,7 @@ print(f"PredictionConvolutions forward() classes_scores: {classes_scores.shape}"
 
 assert(expected_shape_locs == list(locs.shape))
 assert(expected_shape_classes_scores == list(classes_scores.shape))
+
+ssd = SSD300(num_classes, vggbase)
+x_tensors = torch.rand([1, 3, 300, 300])
+print(ssd(x_tensors))
