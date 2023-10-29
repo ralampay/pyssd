@@ -63,4 +63,7 @@ assert(expected_shape_classes_scores == list(classes_scores.shape))
 
 ssd = SSD300(num_classes, vggbase)
 x_tensors = torch.rand([1, 3, 300, 300])
-print(ssd(x_tensors))
+
+ssd_locs, ssd_classes_scores = ssd(x_tensors)
+print(f"SSD300 forward() locs: {ssd_locs.shape}")
+print(f"SSD300 forward() classes_scores: {ssd_classes_scores.shape}")
