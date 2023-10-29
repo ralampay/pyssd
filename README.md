@@ -30,6 +30,6 @@ python test_train.py
 * `tqdm`
 * `torch`
 * `torchivision`
-* `opencv-python
+* `opencv-python`
 
 **Source:** https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Object-Detection
