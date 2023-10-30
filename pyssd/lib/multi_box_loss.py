@@ -104,6 +104,8 @@ class MultiBoxLoss(nn.Module):
         conf_loss_all = conf_loss_all.view(batch_size, n_priors)  # (N, 8732)
 
         # We already know which priors are positive
+
+        # positive_priors all False
         conf_loss_pos = conf_loss_all[positive_priors]  # (sum(n_positives))
 
         # Next, find which priors are hard-negative
@@ -113,11 +115,13 @@ class MultiBoxLoss(nn.Module):
         conf_loss_neg, _ = conf_loss_neg.sort(dim=1, descending=True)  # (N, 8732), sorted by decreasing hardness
         hardness_ranks = torch.LongTensor(range(n_priors)).unsqueeze(0).expand_as(conf_loss_neg).to(self.device)  # (N, 8732)
         hard_negatives = hardness_ranks < n_hard_negatives.unsqueeze(1)  # (N, 8732)
+        # hard negative all False
         conf_loss_hard_neg = conf_loss_neg[hard_negatives]  # (sum(n_hard_negatives))
 
+        # conf_loss_hard_neg === tensor([]) conf_loss_pos === tensor([]) // n_positives === tensor([0])
         # As in the paper, averaged over positive priors only, although computed over both positive and hard-negative priors
         conf_loss = (conf_loss_hard_neg.sum() + conf_loss_pos.sum()) / n_positives.sum().float()  # (), scalar
 
         # TOTAL LOSS
-
+        debug_loss_output = conf_loss + self.alpha * loc_loss
         return conf_loss + self.alpha * loc_loss

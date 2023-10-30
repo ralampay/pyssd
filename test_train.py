@@ -62,7 +62,9 @@ for epoch in range(epochs):
 
         # update tqdm
         loop.set_postfix(loss=loss.item())
+        
 
+        print('loss: ', loss.item())
         ave_loss += loss.item()
         count += 1
 
