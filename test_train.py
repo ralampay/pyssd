@@ -51,8 +51,8 @@ for epoch in range(epochs):
     for batch_idx, (img, boxes, labels) in enumerate(loop):
         locs, predictions = model(img) 
 
-        print(locs)
-        print(boxes)
+        print('locs: ', locs)
+        print('boxes: ', boxes)
 
         loss = criterion(locs, predictions, boxes, labels)
         
