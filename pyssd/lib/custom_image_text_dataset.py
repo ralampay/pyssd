@@ -20,6 +20,7 @@ class CustomImageTextDataset(Dataset):
         label_file_loc = os.path.join(self.labels_path, self.labels[index])
 
         img = cv2.imread(image_file_loc)
+        
         img = cv2.resize(img, self.img_dim)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = img / 255
@@ -51,7 +52,7 @@ class CustomImageTextDataset(Dataset):
 
         # Convert to tensor
         img = torch.Tensor(img)
-        boxes = torch.Tensor(boxes)
-        labels = torch.Tensor(labels)
+        boxes = torch.FloatTensor(boxes)
+        labels = torch.LongTensor(labels)
 
         return img, boxes, labels

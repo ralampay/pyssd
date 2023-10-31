@@ -34,17 +34,19 @@ class MultiBoxLoss(nn.Module):
         :return: multibox loss, a scalar
         """
         batch_size = predicted_locs.size(0)
+        # batch_size = 2
         n_priors = self.priors_cxcy.size(0)
         n_classes = predicted_scores.size(2)
 
         assert n_priors == predicted_locs.size(1) == predicted_scores.size(1)
 
-        true_locs = torch.zeros((batch_size, n_priors, 4), dtype=torch.float).to(self.device)   # (N, 8732, 4)
-        true_classes = torch.zeros((batch_size, n_priors), dtype=torch.long).to(self.device)    # (N, 8732)
+        true_locs = torch.zeros((batch_size, n_priors, 4), dtype=torch.float).to(self.device)  # (N, 8732, 4)
+        true_classes = torch.zeros((batch_size, n_priors), dtype=torch.long).to(self.device)  # (N, 8732)
 
         # For each image
         for i in range(batch_size):
             n_objects = boxes[i].size(0)
+            
 
             overlap = find_jaccard_overlap(boxes[i],
                                            self.priors_xy)  # (n_objects, 8732)
@@ -75,13 +77,15 @@ class MultiBoxLoss(nn.Module):
             true_classes[i] = label_for_each_prior
 
             # Encode center-size object coordinates into the form we regressed predicted boxes to
+            check1 = boxes[i][object_for_each_prior]
+            check2 = self.priors_cxcy
             true_locs[i] = cxcy_to_gcxgcy(xy_to_cxcy(boxes[i][object_for_each_prior]), self.priors_cxcy)  # (8732, 4)
 
         # Identify priors that are positive (object/non-background)
         positive_priors = true_classes != 0  # (N, 8732)
 
         # LOCALIZATION LOSS
-
+        
         # Localization loss is computed only over positive (non-background) priors
         loc_loss = self.smooth_l1(predicted_locs[positive_priors], true_locs[positive_priors])  # (), scalar
 
@@ -114,9 +118,9 @@ class MultiBoxLoss(nn.Module):
         hardness_ranks = torch.LongTensor(range(n_priors)).unsqueeze(0).expand_as(conf_loss_neg).to(self.device)  # (N, 8732)
         hard_negatives = hardness_ranks < n_hard_negatives.unsqueeze(1)  # (N, 8732)
         conf_loss_hard_neg = conf_loss_neg[hard_negatives]  # (sum(n_hard_negatives))
-
+        clamped_positive_n = torch.clamp(n_positives.sum().float(), min=1e-8)
         # As in the paper, averaged over positive priors only, although computed over both positive and hard-negative priors
-        conf_loss = (conf_loss_hard_neg.sum() + conf_loss_pos.sum()) / n_positives.sum().float()  # (), scalar
+        conf_loss = (conf_loss_hard_neg.sum() + conf_loss_pos.sum()) / clamped_positive_n  # (), scalar
 
         # TOTAL LOSS
 

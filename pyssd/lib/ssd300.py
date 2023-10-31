@@ -3,6 +3,8 @@ from math import sqrt
 import torch
 import sys
 import os
+
+from pyssd.lib.vgg16 import VGGBase
 sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 
 from auxiliary_convolutions import AuxiliaryConvolutions
@@ -26,7 +28,7 @@ class SSD300(nn.Module):
         - conv4_3_feats with shape (N, 512, 38, 38)
         - conv7_feats with shape (N, 1024, 19, 19)
         """
-        self.base = base 
+        self.base = VGGBase()
 
         # Set auxiliary and prediction convolutions
         self.aux_convs  = AuxiliaryConvolutions()
@@ -39,9 +41,9 @@ class SSD300(nn.Module):
         )
 
         nn.init.constant_(self.rescale_factors, 20)
-
+        
         # Prior boxes
-        self.prior_cxcy = self.create_prior_boxes()
+        self.priors_cxcy = self.create_prior_boxes()
 
     def forward(self, image):
         """
@@ -67,8 +69,9 @@ class SSD300(nn.Module):
         # Run prediction convolutions (predict offsets w.r.t prior-boxes and classes in each resulting localization box)
         locs, classes_scores = self.pred_convs(conv4_3_feats, conv7_feats, conv8_2_feats, conv9_2_feats, conv10_2_feats,
                                                conv11_2_feats)  # (N, 8732, 4), (N, 8732, n_classes)
-
-        return locs, classes_scores
+      
+        # locs[:, :, -2:] = torch.clamp(locs[:, :, -2:], 0, 1)
+        return  locs, classes_scores
 
     def create_prior_boxes(self):
         """
@@ -122,7 +125,6 @@ class SSD300(nn.Module):
 
         prior_boxes = torch.FloatTensor(prior_boxes).to(self.device)  # (8732, 4)
         prior_boxes.clamp_(0, 1)  # (8732, 4); this line has no effect; see Remarks section in tutorial
-
         return prior_boxes
 
     def detect_objects(self, predicted_locs, predicted_scores, min_score, max_overlap, top_k):

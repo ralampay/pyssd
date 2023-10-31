@@ -14,7 +14,7 @@ border_color = (0, 0, 255)
 text_color = (0, 0, 0)
 
 # Read the data
-file_path = "test/sample_training/labels/train/00006c07d2b033d1.txt"
+file_path = "test/sample_training/test_output.txt"
 with open(file_path, "r") as file:
     for line in file:
         values = line.strip().split()
