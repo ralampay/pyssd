@@ -74,16 +74,23 @@ class MultiBoxLoss(nn.Module):
             # Store
             true_classes[i] = label_for_each_prior
 
+            check1 = xy_to_cxcy(boxes[i][object_for_each_prior])
+            check2 = self.priors_cxcy
+            check3 = cxcy_to_gcxgcy(check1, check2)
             # Encode center-size object coordinates into the form we regressed predicted boxes to
             true_locs[i] = cxcy_to_gcxgcy(xy_to_cxcy(boxes[i][object_for_each_prior]), self.priors_cxcy)  # (8732, 4)
 
         # Identify priors that are positive (object/non-background)
-        positive_priors = true_classes != 0  # (N, 8732)
-
+        # positive_priors = true_classes != 0  # (N, 8732)
+        positive_priors = true_classes >= 0
         # LOCALIZATION LOSS
+        # now keepdim for 3-d
+        pl = predicted_locs * positive_priors.unsqueeze(2)
+        tl = true_locs * positive_priors.unsqueeze(2)
+      
 
         # Localization loss is computed only over positive (non-background) priors
-        loc_loss = self.smooth_l1(predicted_locs[positive_priors], true_locs[positive_priors])  # (), scalar
+        loc_loss = self.smooth_l1(pl, tl)  # (), scalar
 
         # Note: indexing with a torch.uint8 (byte) tensor flattens the tensor when indexing is across multiple dimensions (N & 8732)
         # So, if predicted_locs has the shape (N, 8732, 4), predicted_locs[positive_priors] will have (total positives, 4)
