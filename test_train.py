@@ -21,7 +21,7 @@ labels_path = "test/sample_training/labels/train"
 device = "cpu"
 
 base = VGGBase()
-model = SSD300(n_classes=1, base=base)
+model = SSD300(n_classes=2, base=base)
 dataset = CustomImageTextDataset(image_path, labels_path)
 
 epochs = 5
@@ -57,7 +57,7 @@ for param_name, param in model.named_parameters():
             not_biases.append(param)
 optimizer = torch.optim.SGD(params=[{'params': biases, 'lr': 2 * lr}, {'params': not_biases}],
                             lr=lr, momentum=momentum, weight_decay=weight_decay)
-for epoch in range(epochs):
+for epoch in range(500):
     print(f"Epoch: {epoch + 1}")
 
     loop = tqdm(train_loader)
@@ -74,7 +74,7 @@ for epoch in range(epochs):
         images = images.to(device)  # (batch_size (N), 3, 300, 300)
         boxes = [b.to(device) for b in boxes]
         labels = [l.to(device) for l in labels]
-
+        
         locs, predictions = model(images) 
 
         print('locs: ', locs)

@@ -3,6 +3,8 @@ from math import sqrt
 import torch
 import sys
 import os
+
+from pyssd.lib.vgg16 import VGGBase
 sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 
 from auxiliary_convolutions import AuxiliaryConvolutions
@@ -26,7 +28,7 @@ class SSD300(nn.Module):
         - conv4_3_feats with shape (N, 512, 38, 38)
         - conv7_feats with shape (N, 1024, 19, 19)
         """
-        self.base = base 
+        self.base = VGGBase()
 
         # Set auxiliary and prediction convolutions
         self.aux_convs  = AuxiliaryConvolutions()

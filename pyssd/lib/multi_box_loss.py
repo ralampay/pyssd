@@ -85,13 +85,9 @@ class MultiBoxLoss(nn.Module):
         positive_priors = true_classes != 0  # (N, 8732)
 
         # LOCALIZATION LOSS
-        pl = predicted_locs[positive_priors]
-        tl = true_locs[positive_priors]
-        if pl.numel() == 0 and tl.numel() == 0:
-           loc_loss = torch.Tensor([50.0])
-        else:
+        
         # Localization loss is computed only over positive (non-background) priors
-            loc_loss = self.smooth_l1(predicted_locs[positive_priors], true_locs[positive_priors])  # (), scalar
+        loc_loss = self.smooth_l1(predicted_locs[positive_priors], true_locs[positive_priors])  # (), scalar
 
         # Note: indexing with a torch.uint8 (byte) tensor flattens the tensor when indexing is across multiple dimensions (N & 8732)
         # So, if predicted_locs has the shape (N, 8732, 4), predicted_locs[positive_priors] will have (total positives, 4)
