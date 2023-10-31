@@ -20,15 +20,15 @@ labels_path = "test/sample_training/labels/train"
 device = "cpu"
 
 base = VGGBase()
-model = SSD300(2, base).to(device)
+model = SSD300(1, base).to(device)
 
 dataset = CustomImageTextDataset(image_path, labels_path)
 
-epochs = 10
+epochs = 5
 
 batch_size = 5
 
-criterion = MultiBoxLoss(model.prior_cxcy).to(device)
+criterion = MultiBoxLoss(priors_cxcy=model.priors_cxcy).to(device)
 
 train_loader = DataLoader(
     dataset,
@@ -49,15 +49,20 @@ for epoch in range(epochs):
     count = 0
 
     for batch_idx, (img, boxes, labels) in enumerate(loop):
+        check1 = img
+        check2 = boxes
+        check3 = labels
+        check4 = torch.squeeze(img)
+        shape = img[0].size(0)
         locs, predictions = model(img) 
 
         print('locs: ', locs)
-        print('boxes: ', boxes)
+        print('predictions: ', predictions)
 
         loss = criterion(locs, predictions, boxes, labels)
         
         optimizer.zero_grad()
-
+        loss.backward()
         optimizer.step()
 
         # update tqdm
@@ -70,3 +75,4 @@ for epoch in range(epochs):
 
     ave_loss = ave_loss / count
     print(ave_loss)
+
