@@ -120,7 +120,10 @@ class MultiBoxLoss(nn.Module):
 
         # conf_loss_hard_neg === tensor([]) conf_loss_pos === tensor([]) // n_positives === tensor([0])
         # As in the paper, averaged over positive priors only, although computed over both positive and hard-negative priors
-        conf_loss = (conf_loss_hard_neg.sum() + conf_loss_pos.sum()) / n_positives.sum().float()  # (), scalar
+        if (n_positives.sum().float() > 0):
+            conf_loss = (conf_loss_hard_neg.sum() + conf_loss_pos.sum()) / n_positives.sum().float()  # (), scalar
+        else:
+            conf_loss = 0
 
         # TOTAL LOSS
         debug_loss_output = conf_loss + self.alpha * loc_loss
