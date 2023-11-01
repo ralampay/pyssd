@@ -104,8 +104,54 @@ def detect(original_image, min_score, max_overlap, top_k, suppress=None):
     return annotated_image
 
 
+def draw_many(original_image, min_score, max_overlap, top_k,):
+    border_color = (0, 0, 255)
+    text_color = (0, 0, 0)
+    # Transform
+    image = normalize(to_tensor(resize(original_image)))
+
+    # Move to default device
+    image = image.to(device)
+
+    # Forward prop.
+    predicted_locs, predicted_scores = model(image.unsqueeze(0))
+    # Initialize a list to store bounding boxes and labels
+    bounding_boxes = []
+
+     # Detect objects in SSD output
+    det_boxes, det_labels, det_scores = model.detect_objects(predicted_locs, predicted_scores, min_score=min_score,
+                                                             max_overlap=max_overlap, top_k=top_k)
+    # Move detections to the CPU
+    det_boxes = det_boxes[0].to('cpu')
+
+    # Transform to original image dimensions
+    original_dims = torch.FloatTensor(
+        [original_image.width, original_image.height, original_image.width, original_image.height]).unsqueeze(0)
+    det_boxes = det_boxes * original_dims
+
+
+    draw = ImageDraw.Draw(original_image) 
+
+    for i in (det_boxes.size(0)):
+        box_location = det_boxes[i].tolist()
+        x_center, y_center, width, height = box_location
+        left = x_center - (width / 2)
+        top = y_center - (height / 2)
+        right = x_center + (width / 2)
+        bottom = y_center + (height / 2)
+
+        box_location = [left, top, right, bottom]
+        draw.rectangle(xy=box_location, outline=border_color)
+
+    # Define a font for text labels
+    font = ImageFont.truetype("./OpenSans-Light.ttf", 12)
+    # Display or save the image
+    original_image.show()
+
+
 if __name__ == '__main__':
     img_path = 'test/sample_training/images/train/00006c07d2b033d1.jpg'
     original_image = Image.open(img_path, mode='r')
     original_image = original_image.convert('RGB')
     detect(original_image, min_score=0.2, max_overlap=0.5, top_k=200).show()
+    # draw_many(original_image=original_image)
