@@ -79,7 +79,7 @@ class MultiBoxLoss(nn.Module):
             # Encode center-size object coordinates into the form we regressed predicted boxes to
             check1 = boxes[i][object_for_each_prior]
             check2 = self.priors_cxcy
-            true_locs[i] = cxcy_to_gcxgcy(xy_to_cxcy(boxes[i][object_for_each_prior]), self.priors_cxcy)  # (8732, 4)
+            true_locs[i] = cxcy_to_gcxgcy(xy_to_cxcy(boxes[i][object_for_each_prior].to(self.device)), self.priors_cxcy.to(self.device)).to(self.device)  # (8732, 4)
 
         # Identify priors that are positive (object/non-background)
         positive_priors = true_classes != 0  # (N, 8732)
