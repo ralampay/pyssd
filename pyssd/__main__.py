@@ -1,11 +1,8 @@
 import sys
 import argparse
 import os
-import datetime
 import os.path
 import json
-
-from torch import mode
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 from modules.detect_image import DetectImage
