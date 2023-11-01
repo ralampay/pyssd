@@ -47,16 +47,18 @@ decay_lr_to = 0.1  # decay learning rate to this fraction of the existing learni
 momentum = 0.9  # momentum
 weight_decay = 5e-4  # weight decay
 # Initialize the optimizer, with twice the default learning rate for biases, as in the original Caffe repo
-biases = list()
-not_biases = list()
-for param_name, param in model.named_parameters():
-    if param.requires_grad:
-        if param_name.endswith('.bias'):
-            biases.append(param)
-        else:
-            not_biases.append(param)
-optimizer = torch.optim.SGD(params=[{'params': biases, 'lr': 2 * lr}, {'params': not_biases}],
-                            lr=lr, momentum=momentum, weight_decay=weight_decay)
+#biases = list()
+#not_biases = list()
+#for param_name, param in model.named_parameters():
+#    if param.requires_grad:
+#        if param_name.endswith('.bias'):
+#            biases.append(param)
+#        else:
+#            not_biases.append(param)
+#optimizer = torch.optim.SGD(params=[{'params': biases, 'lr': 2 * lr}, {'params': not_biases}],
+#                            lr=lr, momentum=momentum, weight_decay=weight_decay)
+
+optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 for epoch in range(500):
     print(f"Epoch: {epoch + 1}")
 
@@ -66,19 +68,22 @@ for epoch in range(500):
     count = 0
 
     # Decay learning rate at particular epochs
-    if epoch in decay_lr_at:
-        adjust_learning_rate(optimizer, decay_lr_to)
+#    if epoch in decay_lr_at:
+#        adjust_learning_rate(optimizer, decay_lr_to)
 
     for batch_idx, (images, boxes, labels) in enumerate(loop):
         # Move to default device
         images = images.to(device)  # (batch_size (N), 3, 300, 300)
-        boxes = [b.to(device) for b in boxes]
-        labels = [l.to(device) for l in labels]
+#        boxes = [b.to(device) for b in boxes]
+#        labels = [l.to(device) for l in labels]
+
+        boxes = boxes.to(device)
+        labels = labels.to(device)
         
         locs, predictions = model(images) 
 
-        print('locs: ', locs)
-        print('predictions: ', predictions)
+#        print('locs: ', locs)
+#        print('predictions: ', predictions)
 
         loss = criterion(locs, predictions, boxes, labels)
         
@@ -90,10 +95,10 @@ for epoch in range(500):
         loop.set_postfix(loss=loss.item())
         
 
-        print('loss: ', loss.item())
+#        print('loss: ', loss.item())
         ave_loss += loss.item()
         count += 1
 
     ave_loss = ave_loss / count
-    print(ave_loss)
 
+    print(f'Ave Loss: {ave_loss}')
