@@ -45,7 +45,6 @@ def detect(original_image, min_score, max_overlap, top_k, suppress=None):
     det_boxes, det_labels, det_scores = model.detect_objects(predicted_locs, predicted_scores, min_score=min_score,
                                                              max_overlap=max_overlap, top_k=top_k)
 
-    
     # Move detections to the CPU
     det_boxes = det_boxes[0].to('cpu')
 
@@ -122,15 +121,17 @@ def draw_many(original_image):
     # Forward prop.
     predicted_locs, predicted_scores = model(image.unsqueeze(0))
     # Initialize a list to store bounding boxes and labels
-    bounding_boxes = []
+    bounding_boxes = []    
 
+    # we need to decode it because we encoded
+    det_boxes = cxcy_to_xy(gcxgcy_to_cxcy(predicted_locs[0], model.priors_cxcy))
     # Transform to original image dimensions
     original_dims = torch.FloatTensor(
         [original_image.width, original_image.height, original_image.width, original_image.height])[0].unsqueeze(0)
     
-    for box, class_probs in zip(predicted_locs[0], predicted_scores[0]):
-        # class_id = class_probs.argmax().item()
-        # class_probability = class_probs[class_id].item()
+    for box, class_probs in zip(det_boxes, predicted_scores[0]):
+        class_id = class_probs.argmax().item()
+        class_probability = class_probs[class_id].item()
         # this part is done from SSD300().detect_objects
         box = box * original_dims
         x_center, y_center, width, height = box.tolist()
@@ -168,5 +169,5 @@ if __name__ == '__main__':
     img_path = 'test/sample_training/images/train/00006c07d2b033d1.jpg'
     original_image = Image.open(img_path, mode='r')
     original_image = original_image.convert('RGB')
-    # detect(original_image, min_score=0.2, max_overlap=0.5, top_k=200).show()
-    draw_many(original_image=original_image)
+    detect(original_image, min_score=0.2, max_overlap=0.5, top_k=200).show()
+    # draw_many(original_image=original_image) 
