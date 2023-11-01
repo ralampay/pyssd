@@ -42,7 +42,7 @@ class CustomImageTextDataset(Dataset):
             for line in label_file:
                 values = line.strip().split()
 
-                class_id    = int(values[0])
+                class_id    = int(values[0]) + 1 # Add plus 1 to ensure no 0 value
                 x_center    = float(values[1])
                 y_center    = float(values[2])
                 width       = float(values[3])

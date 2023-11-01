@@ -5,5 +5,5 @@
   "image_file":   "test/sample_training/images/train/00006c07d2b033d1.jpg",
   "min_score":    0.0001,
   "max_overlap":  0.5,
-  "top_k":        2
+  "top_k":        5
 }
