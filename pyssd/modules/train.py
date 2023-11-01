@@ -50,7 +50,8 @@ class Train:
         ).to(self.device)
 
         self.criterion = MultiBoxLoss(
-            priors_cxcy=self.model.priors_cxcy
+            priors_cxcy=self.model.priors_cxcy,
+            device=self.device
         ).to(self.device)
 
         self.dataset = CustomImageTextDataset(
