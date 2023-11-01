@@ -52,7 +52,7 @@ def detect(original_image, min_score, max_overlap, top_k, suppress=None):
     original_dims = torch.FloatTensor(
         [original_image.width, original_image.height, original_image.width, original_image.height]).unsqueeze(0)
     det_boxes = det_boxes * original_dims
-
+    
     # Decode class integer labels
     det_labels = [rev_label_map[l] for l in det_labels[0].to('cpu').tolist()]
 
@@ -74,7 +74,7 @@ def detect(original_image, min_score, max_overlap, top_k, suppress=None):
 
         box_location = det_boxes[i].tolist()
         x_center, y_center, width, height = box_location
-        left = x_center - (width / 2)
+        left = x_center - (width / 2) 
         top = y_center - (height / 2)
         right = x_center + (width / 2)
         bottom = y_center + (height / 2)
@@ -169,5 +169,7 @@ if __name__ == '__main__':
     img_path = 'test/sample_training/images/train/00006c07d2b033d1.jpg'
     original_image = Image.open(img_path, mode='r')
     original_image = original_image.convert('RGB')
-    detect(original_image, min_score=0.2, max_overlap=0.5, top_k=200).show()
+    # min_score 
+    # top_k
+    detect(original_image, min_score=0.0001, max_overlap=0.5, top_k=2).show()
     # draw_many(original_image=original_image) 
