@@ -24,7 +24,7 @@ base = VGGBase()
 model = SSD300(n_classes=2, base=base)
 dataset = CustomImageTextDataset(image_path, labels_path)
 
-epochs = 30
+epochs = 50
 
 batch_size = 5
 
@@ -153,7 +153,7 @@ for box, class_probs in zip(locs[0], predictions[0]):
     print(f'class_id: {class_id} class_probability: {class_probability}')
 
     # Only print valid coordinates
-    if x1 >= 0 and x1 <= 300 and x2 >= 0 and x2 <= 300 and y1 >= 0 and y1 <= 300 and y2 >= 0 and y2 <= 300:
+    if x1 >= 0 and x2 >= 0 and y1 >= 0 and y2 >= 0:
         # Draw the bounding box on the output image
         print((x1, y1))
         print((x2, y2))
