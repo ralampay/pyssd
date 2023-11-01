@@ -129,8 +129,9 @@ def draw_many(original_image):
         [original_image.width, original_image.height, original_image.width, original_image.height])[0].unsqueeze(0)
     
     for box, class_probs in zip(predicted_locs[0], predicted_scores[0]):
-        class_id = class_probs.argmax().item()
-        class_probability = class_probs[class_id].item()
+        # class_id = class_probs.argmax().item()
+        # class_probability = class_probs[class_id].item()
+        # this part is done from SSD300().detect_objects
         box = box * original_dims
         x_center, y_center, width, height = box.tolist()
         left = x_center - (width / 2)
