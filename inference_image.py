@@ -104,6 +104,12 @@ def detect(original_image, min_score, max_overlap, top_k, suppress=None):
     return annotated_image
 
 
+"""
+this function here throws an error of:
+self.draw.draw_rectangle(xy, ink, 0, width)
+ValueError: y1 must be greater than or equal to y0
+possibly because PIL is strict in drawing with correct coordinates...
+"""
 def draw_many(original_image):
     border_color = (0, 0, 255)
     text_color = (0, 0, 0)
