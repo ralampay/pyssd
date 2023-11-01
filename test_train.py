@@ -1,11 +1,15 @@
 import cv2
 import torch
 from torch.utils.data import DataLoader
+from PIL import Image, ImageDraw, ImageFont
+
 import sys
 import os
 from tqdm import tqdm
 import torch.optim as optim
-from pyssd.lib.utils import adjust_learning_rate
+from pyssd.lib.utils import adjust_learning_rate, save_checkpoint
+from torchvision import transforms
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 
 from pyssd.lib.vgg16 import VGGBase
@@ -24,7 +28,7 @@ base = VGGBase()
 model = SSD300(n_classes=2, base=base)
 dataset = CustomImageTextDataset(image_path, labels_path)
 
-epochs = 50
+epochs = 100
 
 batch_size = 5
 
@@ -55,10 +59,10 @@ for param_name, param in model.named_parameters():
             biases.append(param)
         else:
             not_biases.append(param)
-optimizer = torch.optim.SGD(params=[{'params': biases, 'lr': 2 * lr}, {'params': not_biases}],
-                            lr=lr, momentum=momentum, weight_decay=weight_decay)
+# optimizer = torch.optim.SGD(params=[{'params': biases, 'lr': 2 * lr}, {'params': not_biases}],
+#                             lr=lr, momentum=momentum, weight_decay=weight_decay)
 
-#optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 for epoch in range(epochs):
     print(f"Epoch: {epoch + 1}")
 
@@ -100,23 +104,36 @@ for epoch in range(epochs):
         count += 1
 
     ave_loss = ave_loss / count
-
+    save_checkpoint(epoch, model, optimizer)
     print(f'Ave Loss: {ave_loss}')
 
-# Test the model on training data to see if we have something close
-original_image = cv2.imread("test/sample_training/images/train/00006c07d2b033d1.jpg")
-# Resize the image
-original_image = cv2.resize(original_image, (300, 300))
-normalized_image = original_image / 255
 
-transposed_img = normalized_image.transpose((2, 0, 1))
+
+# -------------- draw
+
+
+
+img_path = 'test/sample_training/images/train/00006c07d2b033d1.jpg'
+original_image = Image.open(img_path, mode='r')
+original_image = original_image.convert('RGB')
+
+
+resize = transforms.Resize((300, 300))
+to_tensor = transforms.ToTensor()
+normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225])
+
+original_image = original_image.convert('RGB')
+
+image = normalize(to_tensor(resize(original_image)))
+
+
 
 print(f"Original shape: {original_image.shape}")
-print(f"Transposed: {transposed_img.shape}")
+print(f"Transposed: {image.shape}")
 
 # Create as tensor
-tensor_image = torch.tensor(transposed_img, dtype=torch.float32)
-tensor_image = tensor_image.unsqueeze(0)    # Add a batch dimension
+tensor_image = image.unsqueeze(0)    # Add a batch dimension
 
 print(f"Tensor shape: {tensor_image.shape}")
 

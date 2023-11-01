@@ -2,6 +2,13 @@ import cv2
 import torch
 from torch.utils.data import Dataset
 import os
+from PIL import Image
+from torchvision import transforms
+
+resize = transforms.Resize((300, 300))
+to_tensor = transforms.ToTensor()
+normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225])
 
 class CustomImageTextDataset(Dataset):
     def __init__(self, image_path, labels_path, img_dim=(300,300)):
@@ -19,14 +26,12 @@ class CustomImageTextDataset(Dataset):
         image_file_loc = os.path.join(self.image_path, self.images[index])
         label_file_loc = os.path.join(self.labels_path, self.labels[index])
 
-        img = cv2.imread(image_file_loc)
-        
-        img = cv2.resize(img, self.img_dim)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = img / 255
+        original_image = Image.open(image_file_loc, mode='r')
+        original_image = original_image.convert('RGB')
 
-        # transpose
-        img = img.transpose((2, 0, 1))
+        image = normalize(to_tensor(resize(original_image)))
+
+        
 
         labels = []
         boxes = []
@@ -51,8 +56,8 @@ class CustomImageTextDataset(Dataset):
                 ])
 
         # Convert to tensor
-        img = torch.Tensor(img)
+        # img = torch.Tensor(img)
         boxes = torch.FloatTensor(boxes)
         labels = torch.LongTensor(labels)
 
-        return img, boxes, labels
+        return image, boxes, labels

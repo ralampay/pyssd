@@ -1,5 +1,21 @@
 import torch
 
+
+# Label map
+voc_labels = ('face')
+label_map = {k: v + 1 for v, k in enumerate(voc_labels)}
+label_map['background'] = 0
+rev_label_map = {v: k for k, v in label_map.items()}  # Inverse mapping
+
+# Color map for bounding boxes of detected objects from https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
+distinct_colors = ['#e6194b', '#3cb44b', '#ffe119', '#0082c8', '#f58231', '#911eb4', '#46f0f0', '#f032e6',
+                   '#d2f53c', '#fabebe', '#008080', '#000080', '#aa6e28', '#fffac8', '#800000', '#aaffc3', '#808000',
+                   '#ffd8b1', '#e6beff', '#808080', '#FFFFFF']
+label_color_map = {k: distinct_colors[i] for i, k in enumerate(label_map.keys())}
+
+
+
+
 def xy_to_cxcy(xy):
     """
     Convert bounding boxes from boundary coordinates (x_min, y_min, x_max, y_max) to center-size coordinates (c_x, c_y, w, h).
@@ -111,3 +127,17 @@ def adjust_learning_rate(optimizer, scale):
     for param_group in optimizer.param_groups:
         param_group['lr'] = param_group['lr'] * scale
     print("DECAYING learning rate.\n The new LR is %f\n" % (optimizer.param_groups[1]['lr'],))
+
+def save_checkpoint(epoch, model, optimizer):
+    """
+    Save model checkpoint.
+
+    :param epoch: epoch number
+    :param model: model
+    :param optimizer: optimizer
+    """
+    state = {'epoch': epoch,
+             'model': model,
+             'optimizer': optimizer}
+    filename = 'checkpoint_ssd300.pth.tar'
+    torch.save(state, filename)
