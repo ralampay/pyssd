@@ -1,1 +1,1 @@
-text_size
+original_image

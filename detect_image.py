@@ -12,7 +12,7 @@ print('\nLoaded checkpoint from epoch %d.\n' % start_epoch)
 model = checkpoint['model']
 model = model.to(device)
 model.eval()
-image_offset = 100
+# image_offset = 100
 # Transforms
 resize = transforms.Resize((300, 300))
 to_tensor = transforms.ToTensor()
@@ -45,6 +45,7 @@ def detect(original_image, min_score, max_overlap, top_k, suppress=None):
     det_boxes, det_labels, det_scores = model.detect_objects(predicted_locs, predicted_scores, min_score=min_score,
                                                              max_overlap=max_overlap, top_k=top_k)
 
+    
     # Move detections to the CPU
     det_boxes = det_boxes[0].to('cpu')
 
@@ -52,8 +53,6 @@ def detect(original_image, min_score, max_overlap, top_k, suppress=None):
     original_dims = torch.FloatTensor(
         [original_image.width, original_image.height, original_image.width, original_image.height]).unsqueeze(0)
     det_boxes = det_boxes * original_dims
-    det_boxes[0][2] = det_boxes[0][2] + image_offset
-    det_boxes[0][3] = det_boxes[0][3] + image_offset
 
     # Decode class integer labels
     det_labels = [rev_label_map[l] for l in det_labels[0].to('cpu').tolist()]
@@ -74,10 +73,17 @@ def detect(original_image, min_score, max_overlap, top_k, suppress=None):
             if det_labels[i] in suppress:
                 continue
 
-        # Boxes
         box_location = det_boxes[i].tolist()
+        x_center, y_center, width, height = box_location
+        left = x_center - (width / 2)
+        top = y_center - (height / 2)
+        right = x_center + (width / 2)
+        bottom = y_center + (height / 2)
+
+        # update box_location
+        box_location = [left, top, right, bottom]
         draw.rectangle(xy=box_location, outline=label_color_map[det_labels[i]])
-        draw.rectangle(xy=[l + 1. for l in box_location], outline=label_color_map[
+        draw.rectangle(xy=[l + 3. for l in box_location], outline=label_color_map[
             det_labels[i]])  # a second rectangle at an offset of 1 pixel to increase line thickness
         # draw.rectangle(xy=[l + 2. for l in box_location], outline=label_color_map[
         #     det_labels[i]])  # a third rectangle at an offset of 1 pixel to increase line thickness
