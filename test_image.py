@@ -27,7 +27,7 @@ tensor_image = tensor_image.unsqueeze(0)    # Add a batch dimension
 print(f"Tensor shape: {tensor_image.shape}")
 
 base = VGGBase()
-model = SSD300(1, base)
+model = SSD300(2, base)
 
 locs, predictions = model(tensor_image)
 

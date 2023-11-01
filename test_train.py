@@ -24,7 +24,7 @@ base = VGGBase()
 model = SSD300(n_classes=2, base=base)
 dataset = CustomImageTextDataset(image_path, labels_path)
 
-epochs = 5
+epochs = 30
 
 batch_size = 5
 
@@ -47,19 +47,19 @@ decay_lr_to = 0.1  # decay learning rate to this fraction of the existing learni
 momentum = 0.9  # momentum
 weight_decay = 5e-4  # weight decay
 # Initialize the optimizer, with twice the default learning rate for biases, as in the original Caffe repo
-#biases = list()
-#not_biases = list()
-#for param_name, param in model.named_parameters():
-#    if param.requires_grad:
-#        if param_name.endswith('.bias'):
-#            biases.append(param)
-#        else:
-#            not_biases.append(param)
-#optimizer = torch.optim.SGD(params=[{'params': biases, 'lr': 2 * lr}, {'params': not_biases}],
-#                            lr=lr, momentum=momentum, weight_decay=weight_decay)
+biases = list()
+not_biases = list()
+for param_name, param in model.named_parameters():
+    if param.requires_grad:
+        if param_name.endswith('.bias'):
+            biases.append(param)
+        else:
+            not_biases.append(param)
+optimizer = torch.optim.SGD(params=[{'params': biases, 'lr': 2 * lr}, {'params': not_biases}],
+                            lr=lr, momentum=momentum, weight_decay=weight_decay)
 
-optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-for epoch in range(500):
+#optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+for epoch in range(epochs):
     print(f"Epoch: {epoch + 1}")
 
     loop = tqdm(train_loader)
@@ -102,3 +102,71 @@ for epoch in range(500):
     ave_loss = ave_loss / count
 
     print(f'Ave Loss: {ave_loss}')
+
+# Test the model on training data to see if we have something close
+original_image = cv2.imread("test/sample_training/images/train/00006c07d2b033d1.jpg")
+# Resize the image
+original_image = cv2.resize(original_image, (300, 300))
+normalized_image = original_image / 255
+
+transposed_img = normalized_image.transpose((2, 0, 1))
+
+print(f"Original shape: {original_image.shape}")
+print(f"Transposed: {transposed_img.shape}")
+
+# Create as tensor
+tensor_image = torch.tensor(transposed_img, dtype=torch.float32)
+tensor_image = tensor_image.unsqueeze(0)    # Add a batch dimension
+
+print(f"Tensor shape: {tensor_image.shape}")
+
+original_image_width = 300
+original_image_height = 300
+
+# Set model for evaluation
+model.eval()
+
+locs, predictions = model(tensor_image)
+
+print(f"Locs Shape: {locs.shape}")
+print(f"Predictions Shape: {predictions.shape}")
+
+original_image_width = 300
+original_image_height = 300
+border_color = (0, 0, 255)
+text_color = (0, 0, 0)
+
+
+for box, class_probs in zip(locs[0], predictions[0]):
+    # Extract center coordinates (x_center, y_center, width, height)
+    x_center, y_center, width, height = box
+
+    class_id = class_probs.argmax().item()
+    class_probability = class_probs[class_id].item()
+
+    # Calculate the (x1, y1) and (x2, y2) coordinates of the bounding box
+    x1 = int((x_center - width / 2) * original_image_width)
+    y1 = int((y_center - height / 2) * original_image_height)
+    x2 = int((x_center + width / 2) * original_image_width)
+    y2 = int((y_center + height / 2) * original_image_height)
+
+    print(f'class_id: {class_id} class_probability: {class_probability}')
+
+    # Only print valid coordinates
+    if x1 >= 0 and x1 <= 300 and x2 >= 0 and x2 <= 300 and y1 >= 0 and y1 <= 300 and y2 >= 0 and y2 <= 300:
+        # Draw the bounding box on the output image
+        print((x1, y1))
+        print((x2, y2))
+
+        cv2.rectangle(original_image, (x1, y1), (x2, y2), border_color, 1)
+
+        # Display class name and probability
+        class_name = f'Class {class_id}'
+        text = f'{class_name}: {class_probability:.2f}'
+        cv2.putText(original_image, text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, text_color, 2)
+
+
+# Display or save the image
+cv2.imshow('SSD Output', original_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
