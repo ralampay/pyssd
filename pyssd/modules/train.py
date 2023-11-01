@@ -9,13 +9,13 @@ from tqdm import tqdm
 import torch
 import torch.nn as nn
 import torch.optim as optim
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from pyssd.lib.vgg16 import VGGBase
 from pyssd.lib.ssd300 import SSD300
 from pyssd.lib.custom_image_text_dataset import CustomImageTextDataset
 from pyssd.lib.multi_box_loss import MultiBoxLoss
 from pyssd.lib.utils import save_checkpoint
-
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 class Train:
     def __init__(self, params):

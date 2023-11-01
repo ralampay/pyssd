@@ -6,12 +6,22 @@ Python implementation of Single Shot Multi-box Detector.
 
 ### Training
 
-Train an SSD model based on parameters found in `--config_file` option.
+Train an SSD model based on parameters found in `--config-file` option.
 
 Example Command:
 
 ```
-python -m pyssd --mode train --config-file test/sample_config.json
+python -m pyssd --mode train --config-file test/sample_train_config.json
+```
+
+### Detect Image
+
+Detect objects in a given image specified in parameters found in `--config-file` option.
+
+Example Command:
+
+```
+python -m pyssd --mode train --config-file test/sample_detect_image_config.json
 ```
 
 ## Development
