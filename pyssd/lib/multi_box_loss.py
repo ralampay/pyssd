@@ -48,8 +48,8 @@ class MultiBoxLoss(nn.Module):
             n_objects = boxes[i].size(0)
             
 
-            overlap = find_jaccard_overlap(boxes[i],
-                                           self.priors_xy).to(self.device) # (n_objects, 8732)
+            overlap = find_jaccard_overlap(boxes[i].to(self.device),
+                                           self.priors_xy.to(self.device)).to(self.device) # (n_objects, 8732)
 
             # For each prior, find the object that has the maximum overlap
             overlap_for_each_prior, object_for_each_prior = overlap.max(dim=0)  # (8732)
