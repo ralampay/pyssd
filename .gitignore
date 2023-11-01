@@ -42,6 +42,7 @@ notebooks/**/*.[png|jpg|tiff]
 
 # Ignore env
 env/
+.vscode/
 
 tmp/
 notebooks/tmp/
