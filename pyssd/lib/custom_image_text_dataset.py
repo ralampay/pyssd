@@ -1,14 +1,8 @@
-import cv2
 import torch
 from torch.utils.data import Dataset
 import os
 from PIL import Image
 from torchvision import transforms
-
-resize = transforms.Resize((300, 300))
-to_tensor = transforms.ToTensor()
-normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                 std=[0.229, 0.224, 0.225])
 
 class CustomImageTextDataset(Dataset):
     def __init__(self, image_path, labels_path, img_dim=(300,300)):
@@ -18,6 +12,14 @@ class CustomImageTextDataset(Dataset):
 
         self.images = sorted(os.listdir(self.image_path))
         self.labels = sorted(os.listdir(self.labels_path))
+
+        self.resize = transforms.Resize(img_dim)
+        
+        self.to_tensor = transforms.ToTensor()
+        self.normalize = transforms.Normalize(
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225]
+        )
 
     def __len__(self):
         return len(self.images)
@@ -29,9 +31,9 @@ class CustomImageTextDataset(Dataset):
         original_image = Image.open(image_file_loc, mode='r')
         original_image = original_image.convert('RGB')
 
-        image = normalize(to_tensor(resize(original_image)))
-
-        
+        image = self.resize(original_image)
+        image = self.to_tensor(image)
+        image = self.normalize(image)
 
         labels = []
         boxes = []

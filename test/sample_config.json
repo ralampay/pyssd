@@ -1,0 +1,12 @@
+{
+  "device":       "cpu",
+  "gpu_index":    0,
+  "n_classes":    2,
+  "base":         "vgg16",
+  "epochs":       100,
+  "lr":           0.001,
+  "batch_size":   1,
+  "labels_path":  "test/sample_training/labels/train",
+  "images_path":  "test/sample_training/images/train",
+  "model_file":   "checkpoint.pth"
+}

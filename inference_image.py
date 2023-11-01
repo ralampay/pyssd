@@ -82,16 +82,6 @@ def detect(original_image, min_score, max_overlap, top_k, suppress=None):
         # update box_location
         box_location = [left, top, right, bottom]
         draw.rectangle(xy=box_location, outline=label_color_map[det_labels[i]])
-        draw.rectangle(xy=[l + 3. for l in box_location], outline=label_color_map[
-            det_labels[i]])  # a second rectangle at an offset of 1 pixel to increase line thickness
-        # draw.rectangle(xy=[l + 2. for l in box_location], outline=label_color_map[
-        #     det_labels[i]])  # a third rectangle at an offset of 1 pixel to increase line thickness
-        # draw.rectangle(xy=[l + 3. for l in box_location], outline=label_color_map[
-        #     det_labels[i]])  # a fourth rectangle at an offset of 1 pixel to increase line thickness
-
-        # Text
-        # text_size = font.getsize(det_labels[i].upper())
-        # text_size = 1
         text_location = [box_location[0] + 2., box_location[1]]
         textbox_location = [box_location[0], box_location[1] , box_location[0] + 4.,
                             box_location[1]]
@@ -103,73 +93,8 @@ def detect(original_image, min_score, max_overlap, top_k, suppress=None):
     return annotated_image
 
 
-"""
-this function here throws an error of:
-self.draw.draw_rectangle(xy, ink, 0, width)
-ValueError: y1 must be greater than or equal to y0
-possibly because PIL is strict in drawing with correct coordinates...
-"""
-def draw_many(original_image):
-    border_color = (0, 0, 255)
-    text_color = (0, 0, 0)
-    # Transform
-    image = normalize(to_tensor(resize(original_image)))
-
-    # Move to default device
-    image = image.to(device)
-
-    # Forward prop.
-    predicted_locs, predicted_scores = model(image.unsqueeze(0))
-    # Initialize a list to store bounding boxes and labels
-    bounding_boxes = []    
-
-    # we need to decode it because we encoded
-    det_boxes = cxcy_to_xy(gcxgcy_to_cxcy(predicted_locs[0], model.priors_cxcy))
-    # Transform to original image dimensions
-    original_dims = torch.FloatTensor(
-        [original_image.width, original_image.height, original_image.width, original_image.height])[0].unsqueeze(0)
-    
-    for box, class_probs in zip(det_boxes, predicted_scores[0]):
-        class_id = class_probs.argmax().item()
-        class_probability = class_probs[class_id].item()
-        # this part is done from SSD300().detect_objects
-        box = box * original_dims
-        x_center, y_center, width, height = box.tolist()
-        left = x_center - (width / 2)
-        top = y_center - (height / 2)
-        right = x_center + (width / 2)
-        bottom = y_center + (height / 2)
-
-
-        if left >= 0 and left <= 1024 and top >= 0 and top <= 1024 and right >= 0 and right <= 1024 and bottom >= 0 and bottom <= 1024:
-            bounding_boxes.append((left, top, right, bottom, class_id, class_probability))
-
-    # Create a drawing context
-    draw = ImageDraw.Draw(original_image) 
-    # Define a font for text labels
-    font = ImageFont.truetype("./OpenSans-Light.ttf", 12)
-
-    # Now, you have a list of bounding boxes and labels, you can draw them outside the loop
-    for box in bounding_boxes:
-        x1, y1, x2, y2, class_id, class_probability = box
-        draw_box = [x1, y1, x2, y2]
-        # Draw the bounding box on the output image
-        draw.rectangle(draw_box, outline=border_color)
-
-        # Display class name and probability
-        class_name = f'Class {class_id}'
-        text = f'{class_name}: {class_probability:.2f}'
-        draw.text((x1, y1 - 10), text, fill=text_color, font=font)
-
-    # Display or save the image
-    original_image.show()
-
-
 if __name__ == '__main__':
     img_path = 'test/sample_training/images/train/00006c07d2b033d1.jpg'
     original_image = Image.open(img_path, mode='r')
     original_image = original_image.convert('RGB')
-    # min_score 
-    # top_k
     detect(original_image, min_score=0.0001, max_overlap=0.5, top_k=2).show()
-    # draw_many(original_image=original_image) 

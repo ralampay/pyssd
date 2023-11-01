@@ -128,7 +128,7 @@ def adjust_learning_rate(optimizer, scale):
         param_group['lr'] = param_group['lr'] * scale
     print("DECAYING learning rate.\n The new LR is %f\n" % (optimizer.param_groups[1]['lr'],))
 
-def save_checkpoint(epoch, model, optimizer):
+def save_checkpoint(epoch, model, optimizer, filename='checkpoint_ssd300.pth'):
     """
     Save model checkpoint.
 
@@ -139,5 +139,5 @@ def save_checkpoint(epoch, model, optimizer):
     state = {'epoch': epoch,
              'model': model,
              'optimizer': optimizer}
-    filename = 'checkpoint_ssd300.pth.tar'
+
     torch.save(state, filename)
