@@ -62,6 +62,7 @@ class Train:
         self.train_loader = DataLoader(
             self.dataset,
             batch_size=self.batch_size,
+            collate_fn=self.dataset.collate_fn,
             shuffle=False,
             drop_last=False
         )
@@ -84,9 +85,8 @@ class Train:
             for batch_idx, (images, boxes, labels) in enumerate(loop):
                 # Move to default device
                 images = images.to(self.device)  # (batch_size (N), 3, 300, 300)
-
-                boxes = boxes.to(self.device)
-                labels = labels.to(self.device)
+                #boxes = boxes.to(self.device)
+                #labels = labels.to(self.device)
                 
                 locs, predictions = self.model(images) 
 
