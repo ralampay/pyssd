@@ -24,6 +24,10 @@ Example Command:
 python -m pyssd --mode train --config-file test/sample_detect_image_config.json
 ```
 
+## Training in Google Colab
+
+[https://colab.research.google.com/drive/1n53gw3uNTb-zjHhSm-qQ0xrp7a_bJqZW#scrollTo=KA08HVXyZpHL](https://colab.research.google.com/drive/1n53gw3uNTb-zjHhSm-qQ0xrp7a_bJqZW#scrollTo=KA08HVXyZpHL)
+
 ## Development
 
 Install the dependencies:

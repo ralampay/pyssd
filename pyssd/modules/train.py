@@ -5,6 +5,7 @@ import torch
 import numpy as np
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
+from torchvision.transforms.functional import to_tensor
 from tqdm import tqdm
 import torch
 import torch.nn as nn
@@ -85,8 +86,11 @@ class Train:
             for batch_idx, (images, boxes, labels) in enumerate(loop):
                 # Move to default device
                 images = images.to(self.device)  # (batch_size (N), 3, 300, 300)
-                #boxes = boxes.to(self.device)
-                #labels = labels.to(self.device)
+
+                for i in range(len(boxes)):
+                    boxes[i] = boxes[i].to(self.device)
+                for i in range(len(labels)):
+                    labels[i] = labels[i].to(self.device)
                 
                 locs, predictions = self.model(images) 
 
