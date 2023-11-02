@@ -91,6 +91,10 @@ class Train:
                 locs, predictions = self.model(images) 
 
                 loss = self.criterion(locs, predictions, boxes, labels)
+
+                if loss.item() == -1:
+                    ave_loss = -1
+                    break
                 
                 self.optimizer.zero_grad()
                 loss.backward()
@@ -102,10 +106,14 @@ class Train:
                 ave_loss += loss.item()
                 count += 1
 
+            if ave_loss == -1:
+                break
+
             ave_loss = ave_loss / count
             print(f'Ave Loss: {ave_loss}')
 
             print(f"Saving to {self.model_file}...")
+
             save_checkpoint(
                 epoch, 
                 self.model, 

@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 from utils import *
+import math
 
 class MultiBoxLoss(nn.Module):
     """
@@ -79,7 +80,12 @@ class MultiBoxLoss(nn.Module):
             # Encode center-size object coordinates into the form we regressed predicted boxes to
             check1 = boxes[i][object_for_each_prior]
             check2 = self.priors_cxcy
-            true_locs[i] = cxcy_to_gcxgcy(xy_to_cxcy(boxes[i][object_for_each_prior].to(self.device)), self.priors_cxcy.to(self.device)).to(self.device)  # (8732, 4)
+            true_locs[i] = cxcy_to_gcxgcy(
+                xy_to_cxcy(
+                    boxes[i][object_for_each_prior].to(self.device)
+                ), 
+                self.priors_cxcy.to(self.device)
+            ).to(self.device)  # (8732, 4)
 
         # Identify priors that are positive (object/non-background)
         positive_priors = true_classes != 0  # (N, 8732)
@@ -123,5 +129,8 @@ class MultiBoxLoss(nn.Module):
         conf_loss = (conf_loss_hard_neg.sum() + conf_loss_pos.sum()) / clamped_positive_n  # (), scalar
 
         # TOTAL LOSS
-
-        return conf_loss + self.alpha * loc_loss
+        total_loss = conf_loss + self.alpha * loc_loss
+        if math.isnan(total_loss):
+            return -1
+        else:
+            return total_loss

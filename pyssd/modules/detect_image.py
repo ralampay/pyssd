@@ -8,6 +8,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torchvision import transforms
 import cv2
+import platform
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from pyssd.lib.utils import *
@@ -41,9 +42,14 @@ class DetectImage:
             std=[0.229, 0.224, 0.225]
         )
 
+        if self.device == 'cuda':
+            print("CUDA Device: {}".format(torch.cuda.get_device_name(self.gpu_index)))
+            self.device = "cuda:{}".format(self.gpu_index)
+        elif self.device == 'cpu':
+            print(f"CPU Device: {platform.processor()}")
+
         # Initialize the model
-        self.model = torch.load(self.model_file)['model']
-        self.model = self.model.to(self.device)
+        self.model = torch.load(self.model_file, map_location=torch.device(self.device))['model']
         self.model.eval()
 
     """
