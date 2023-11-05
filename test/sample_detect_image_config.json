@@ -2,7 +2,7 @@
   "device":       "cpu",
   "gpu_index":    0,
   "model_file":   "checkpoint.pth",
-  "image_file":   "test/sample_training/images/train/0a5fbc2c83104330.jpg",
+  "image_file":   "/home/ralampay/Desktop/face.png",
   "min_score":    0.0001,
   "max_overlap":  0.5,
   "top_k":        5

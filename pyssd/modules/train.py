@@ -34,6 +34,8 @@ class Train:
         self.model_file     = params.get('model_file')
         self.cont           = params.get('cont') or False
 
+        print(f"Model file: {self.model_file}")
+
         if self.device == 'cuda':
             print("CUDA Device: {}".format(torch.cuda.get_device_name(self.gpu_index)))
             self.device = "cuda:{}".format(self.gpu_index)

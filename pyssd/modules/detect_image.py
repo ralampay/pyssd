@@ -49,7 +49,11 @@ class DetectImage:
             print(f"CPU Device: {platform.processor()}")
 
         # Initialize the model
-        self.model = torch.load(self.model_file, map_location=torch.device(self.device))['model']
+        self.model = torch.load(
+            self.model_file, 
+            map_location=torch.device(self.device)
+        )['model']
+
         self.model.eval()
 
     """
