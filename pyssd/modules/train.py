@@ -73,47 +73,49 @@ class Train:
             lr=self.lr
         )
 
+    def train_epoch(self, epoch):
+        loop = tqdm(self.train_loader)
+
+        ave_loss = 0.
+        count = 0
+
+        for batch_idx, (images, boxes, labels) in enumerate(loop):
+            # Move to default device
+            images = images.to(self.device)  # (batch_size (N), 3, 300, 300)
+
+            for i in range(len(boxes)):
+                boxes[i] = boxes[i].to(self.device)
+            for i in range(len(labels)):
+                labels[i] = labels[i].to(self.device)
+            
+            locs, predictions = self.model(images) 
+
+            loss = self.criterion(locs, predictions, boxes, labels)
+
+            if loss.item() == -1:
+                ave_loss = -1
+                break
+            
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+
+            # update tqdm
+            loop.set_postfix(loss=loss.item())
+            
+            ave_loss += loss.item()
+            count += 1
+
+        ave_loss = ave_loss / count
+
+        return ave_loss
+
     def execute(self):
         print(f"Training for {self.epochs} epochs")
         for epoch in range(self.epochs):
             print(f"Epoch: {epoch + 1}")
+            ave_loss = self.train_epoch(epoch=epoch)
 
-            loop = tqdm(self.train_loader)
-
-            ave_loss = 0.
-            count = 0
-
-            for batch_idx, (images, boxes, labels) in enumerate(loop):
-                # Move to default device
-                images = images.to(self.device)  # (batch_size (N), 3, 300, 300)
-
-                for i in range(len(boxes)):
-                    boxes[i] = boxes[i].to(self.device)
-                for i in range(len(labels)):
-                    labels[i] = labels[i].to(self.device)
-                
-                locs, predictions = self.model(images) 
-
-                loss = self.criterion(locs, predictions, boxes, labels)
-
-                if loss.item() == -1:
-                    ave_loss = -1
-                    break
-                
-                self.optimizer.zero_grad()
-                loss.backward()
-                self.optimizer.step()
-
-                # update tqdm
-                loop.set_postfix(loss=loss.item())
-                
-                ave_loss += loss.item()
-                count += 1
-
-            if ave_loss == -1:
-                break
-
-            ave_loss = ave_loss / count
             print(f'Ave Loss: {ave_loss}')
 
             print(f"Saving to {self.model_file}...")
@@ -124,3 +126,6 @@ class Train:
                 self.optimizer,
                 filename=self.model_file
             )
+
+            if ave_loss == -1:
+                break
