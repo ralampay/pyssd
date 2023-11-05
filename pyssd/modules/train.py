@@ -32,6 +32,7 @@ class Train:
         self.labels_path    = params.get('labels_path')
         self.images_path    = params.get('images_path')
         self.model_file     = params.get('model_file')
+        self.cont           = params.get('cont') or False
 
         if self.device == 'cuda':
             print("CUDA Device: {}".format(torch.cuda.get_device_name(self.gpu_index)))
@@ -49,6 +50,14 @@ class Train:
             n_classes=self.n_classes, 
             base=self.base
         ).to(self.device)
+
+        if self.cont and os.path.exists(self.model_file):
+            state = torch.load(
+                self.model_file,
+                map_location=self.device
+            )
+
+            self.model = state['model']
 
         self.criterion = MultiBoxLoss(
             priors_cxcy=self.model.priors_cxcy,
